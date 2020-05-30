@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,6 +24,12 @@ public class MainActivity extends AppCompatActivity {
         - The function nextLevel() launches the new advanced page.
         - Feel free to modify the function to suit your program.
     */
+    private static final String TAG = MainActivity.class.getSimpleName();
+    int randomLocation = 0;
+    int score = 0;
+    int scoreToAdvance = 2;
+    Button hole1_btn, hole2_btn, hole3_btn;
+    TextView score_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +38,28 @@ public class MainActivity extends AppCompatActivity {
 
         Log.v(TAG, "Finished Pre-Initialisation!");
 
+        hole1_btn = (Button) findViewById(R.id.hole1);
+        hole2_btn = (Button) findViewById(R.id.hole2);
+        hole3_btn = (Button) findViewById(R.id.hole3);
+        score_view = (TextView) findViewById(R.id.score);
+
+        hole1_btn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View V){
+                doCheck(hole1_btn);
+            }
+        });
+        hole2_btn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View V){
+                doCheck(hole2_btn);
+            }
+        });
+        hole3_btn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View V){
+                doCheck(hole3_btn);
+            }
+        });
+
+        setNewMole();
 
     }
     @Override
@@ -55,23 +85,79 @@ public class MainActivity extends AppCompatActivity {
         /* Checks for hit or miss and if user qualify for advanced page.
             Triggers nextLevelQuery().
          */
+        if (checkButton.getText().toString() ==  "*"){
+            Log.v(TAG, "Button Hit!");
+
+            score += 1;
+        }
+
+        else {
+            Log.v(TAG, "Button Missed!");
+            score -= 1;
+        }
+
+        if(score >= scoreToAdvance){
+            nextLevelQuery();
+        }
+        setNewMole();
     }
 
     private void nextLevelQuery(){
-        /*
-        Builds dialog box here.
-        Log.v(TAG, "User accepts!");
-        Log.v(TAG, "User decline!");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Warning! Insane Whack a mole coming!");
+        builder.setMessage("Would you like to advance to advanced Whack a mole?");
+        builder.setCancelable(false);
+        builder.setNegativeButton("Yes", new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id){
+                Log.v(TAG, "User accepts!");
+                nextLevel();
+            }
+        });
+        builder.setPositiveButton("No", new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id){
+                Log.v(TAG, "User decline!");
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+
         Log.v(TAG, "Advance option given to user!");
-        belongs here*/
     }
 
     private void nextLevel(){
-        /* Launch advanced page */
+        Bundle extras = new Bundle();
+        extras.putInt("score", score);
+
+
+        Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+
+        intent.putExtras(extras);
+        startActivity(intent);
+
     }
 
     private void setNewMole() {
+        score_view.setText(Integer.toString(score));
         Random ran = new Random();
-        int randomLocation = ran.nextInt(3);
+        randomLocation = ran.nextInt(3);
+        hole1_btn.setText("0");
+        hole2_btn.setText("0");
+        hole3_btn.setText("0");
+
+        switch(randomLocation) {
+            case 0:
+                hole1_btn.setText("*");
+                break;
+            case 1:
+                hole2_btn.setText("*");
+                break;
+            case 2:
+                hole3_btn.setText("*");
+                break;
+        }
     }
 }
